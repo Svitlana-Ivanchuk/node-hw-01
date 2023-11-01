@@ -1,28 +1,38 @@
+const { Command } = require("commander");
 const contacts = require("./contacts");
-const argv = require("yargs").argv;
 
-function invokeAction({ action, id, name, email, phone }) {
+const program = new Command();
+program
+  .option("-a, --action <type>", "choose action")
+  .option("-i, --id <type>", "user id")
+  .option("-n, --name <type>", "user name")
+  .option("-e, --email <type>", "user email")
+  .option("-p, --phone <type>", "user phone");
+
+program.parse(process.argv);
+
+const argv = program.opts();
+
+async function invokeAction({ action, id, name, email, phone }) {
   switch (action) {
     case "list":
-      contacts
-        .listContacts()
-        .then((data) => console.table(data))
-        .catch((err) => console.error(err));
+      const contactsList = await contacts.listContacts();
+      console.table(contactsList);
       break;
 
     case "get":
-      contacts
-        .getContactById("AeHIrLTr6JkxGE6SN-0Rw")
-        .then((data) => console.log(data))
-        .catch((err) => console.error(err));
+      const contact = await contacts.getContactById(id);
+      console.table(contact);
       break;
 
     case "add":
-      // ... name email phone
+      const newContact = await contacts.addContact(name, email, phone);
+      console.table(newContact);
       break;
 
     case "remove":
-      // ... id
+      const delContact = await contacts.removeContact(id);
+      console.table(delContact);
       break;
 
     default:
